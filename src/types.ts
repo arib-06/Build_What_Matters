@@ -11,6 +11,8 @@ export interface TrainClassAvailability {
   seats?: number
   position?: number
   fare: number
+  confirmationProbability?: 'Likely to confirm' | 'Possible' | 'Unlikely to confirm'
+  waitlistType?: 'GNWL' | 'RAC' | 'RLWL' | 'PQWL' | 'TQWL'
 }
 
 export interface Train {
@@ -27,6 +29,8 @@ export interface Train {
   stops: number
   type: string
   score: number
+  breakdown?: { availability: number; timing: number; duration: number; price: number }
+  relativeReasons?: string[]
   recommendation: string[]
   amenities: string[]
   classes: TrainClassAvailability[]
@@ -56,4 +60,3 @@ export interface BookingState {
   seatPreference: 'together' | 'same-coach' | 'any'
   quota: Quota
 }
-

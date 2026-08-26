@@ -1,5 +1,62 @@
 import type { Train } from './types'
 
+export type TatkalTrainRole = 'recommended' | 'backup' | 'other'
+
+export interface TatkalTrain {
+  id: string
+  number: string
+  name: string
+  classCode: string
+  departure: string
+  arrival: string
+  price: number
+  role: TatkalTrainRole
+  seatSequence: number[]
+}
+
+export const GOOD_ENOUGH_CONFIRMED_SEATS = 5
+export const TATKAL_SCARCE_DEMO_DATE = '2026-08-27'
+export const WAITLIST_EXPLAINER_DEMO_DATE = '2026-08-26'
+export const HEALTHY_DEMO_DATE = '2026-08-30'
+
+const availabilityHash = (value: string) => [...value].reduce((total, character) => ((total * 31) + character.charCodeAt(0)) >>> 0, 17)
+
+// Deterministic stand-in for a railway inventory lookup. Use Chandigarh → New Delhi,
+// 27 Aug 2026, CC to demonstrate the Tatkal fallback: every regular option is scarce.
+export function getRegularAvailabilityForSearch(source: string, destination: string, date: string, classCode: string, trainId: string) {
+  if (source === 'Chandigarh' && destination === 'New Delhi' && date === WAITLIST_EXPLAINER_DEMO_DATE && classCode === 'CC') {
+    if (trainId.includes('vande')) return { confirmedSeats: 0, waitlist: 4, status: 'rac' as const, waitlistType: 'RAC' as const, confirmationProbability: 'Likely to confirm' as const }
+    if (trainId.includes('shatabdi')) return { confirmedSeats: 0, waitlist: 3, status: 'waitlist' as const, waitlistType: 'RLWL' as const, confirmationProbability: 'Possible' as const }
+    return { confirmedSeats: 0, waitlist: 14, status: 'waitlist' as const, waitlistType: 'GNWL' as const, confirmationProbability: 'Possible' as const }
+  }
+  if (source === 'Chandigarh' && destination === 'New Delhi' && date === TATKAL_SCARCE_DEMO_DATE && classCode === 'CC') {
+    const position = trainId.includes('vande') ? 18 : 9
+    return { confirmedSeats: 0, waitlist: position, status: 'waitlist' as const, waitlistType: 'GNWL' as const, confirmationProbability: position > 15 ? 'Unlikely to confirm' as const : 'Possible' as const }
+  }
+  // Healthy-path demo: 30 Aug 2026 should remain a regular-booking result
+  // with enough confirmed seats that Tatkal stays hidden.
+  if (source === 'Chandigarh' && destination === 'New Delhi' && date === HEALTHY_DEMO_DATE && classCode === 'CC') {
+    const seatsByTrain = trainId.includes('vande') ? 26 : trainId.includes('shatabdi') ? 18 : 11
+    return { confirmedSeats: seatsByTrain }
+  }
+  const value = availabilityHash(`${source}|${destination}|${date}|${classCode}|${trainId}`) % 100
+  if (value < 65) return { confirmedSeats: 6 + (value % 24) }
+  const waitlist = 1 + (value % 28)
+  return { confirmedSeats: 0, waitlist, status: 'waitlist' as const, waitlistType: 'GNWL' as const, confirmationProbability: waitlist <= 5 ? 'Likely to confirm' as const : waitlist <= 15 ? 'Possible' as const : 'Unlikely to confirm' as const }
+}
+
+export function getConfirmedSeatsForSearch(source: string, destination: string, date: string, classCode: string, trainId: string) {
+  return getRegularAvailabilityForSearch(source, destination, date, classCode, trainId).confirmedSeats
+}
+
+// Deliberately scripted instead of random so the demo remains predictable.
+export const tatkalTrains: TatkalTrain[] = [
+  { id: 'vande-bharat-tatkal', number: '20977', name: 'Vande Bharat Express', classCode: 'CC', departure: '06:15', arrival: '09:25', price: 1245, role: 'recommended', seatSequence: [7, 7, 4, 2, 0] },
+  { id: 'shatabdi-tatkal', number: '12012', name: 'Kalka Shatabdi', classCode: 'CC', departure: '06:40', arrival: '10:00', price: 980, role: 'backup', seatSequence: [9, 7, 5, 3, 1] },
+  { id: 'paschim-tatkal', number: '12926', name: 'Paschim Express', classCode: '3A', departure: '08:05', arrival: '13:35', price: 1240, role: 'other', seatSequence: [12, 10, 8, 6, 4] },
+  { id: 'himachal-tatkal', number: '14096', name: 'Himalayan Queen', classCode: 'SL', departure: '05:45', arrival: '11:20', price: 685, role: 'other', seatSequence: [14, 11, 8, 5, 2] },
+]
+
 export const trains: Train[] = [
   {
     id: 'vande-bharat-20977',
@@ -21,6 +78,9 @@ export const trains: Train[] = [
       { code: 'CC', label: 'Chair Car', status: 'available', seats: 42, fare: 1245 },
       { code: 'EC', label: 'Executive Chair', status: 'available', seats: 8, fare: 2320 },
     ],
+  },
+  {
+    id: 'jan-shatabdi-12058', number: '12058', name: 'Jan Shatabdi Express', source: 'Chandigarh', sourceCode: 'CDG', destination: 'New Delhi', destinationCode: 'NDLS', departure: '07:25', arrival: '11:35', duration: '4h 10m', stops: 3, type: 'Jan Shatabdi', score: 78, recommendation: ['Balanced fare', 'Morning departure'], amenities: ['Charging', 'Pantry'], classes: [{ code: 'CC', label: 'Chair Car', status: 'available', seats: 16, fare: 890 }],
   },
   {
     id: 'shatabdi-12012',
@@ -108,4 +168,3 @@ export const getStatusTone = (status: Train['classes'][number]['status']) => {
   if (status === 'rac') return 'warning' as const
   return 'error' as const
 }
-

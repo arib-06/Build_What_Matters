@@ -1,7 +1,11 @@
 import type { ScoredTrain } from './scoring'
 
 export type ComparisonRow = { label: string; values: string[]; bestIndexes: number[] }
-const availability = (train: ScoredTrain) => train.classes[0].status === 'available' ? `${train.classes[0].seats} confirmed seats` : `WL ${train.classes[0].position}`
+const availability = (train: ScoredTrain) => {
+  const trainClass = train.classes[0]
+  if (trainClass.status === 'available') return `${trainClass.seats} confirmed seats`
+  return `${trainClass.status === 'rac' ? 'RAC' : 'WL'} ${trainClass.position}`
+}
 
 export function buildComparisonRows(trains: ScoredTrain[]): ComparisonRow[] {
   const values = (get: (train: ScoredTrain) => string) => trains.map(get)
@@ -18,8 +22,9 @@ export function buildComparisonRows(trains: ScoredTrain[]): ComparisonRow[] {
 }
 
 export function getBookOrWaitAdvice(trains: ScoredTrain[]): string | null {
-  const top = trains[0]
-  if (!top || top.classes[0].status === 'available' || top.classes[0].confirmationProbability !== 'Unlikely to confirm') return null
-  const alternative = trains.find((train) => train.id !== top.id && (train.classes[0].status === 'available' || (train.score - top.score >= 15)))
-  return alternative ? `${alternative.name} is more likely to confirm than your WL ${top.classes[0].position} pick on ${top.name} — consider switching.` : null
+  if (!trains.length || trains.some((train) => train.classes[0].status === 'available')) return null
+  const risky = trains.find((train) => train.classes[0].confirmationProbability === 'Unlikely to confirm')
+  if (!risky) return null
+  const alternative = trains.find((train) => train.id !== risky.id && (train.classes[0].status === 'rac' || train.classes[0].confirmationProbability !== 'Unlikely to confirm'))
+  return alternative ? `${alternative.name} has a stronger confirmation outlook than waiting on ${risky.name} at WL ${risky.classes[0].position}.` : null
 }
