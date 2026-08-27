@@ -78,6 +78,15 @@ export function TrainShowcase({ items = trainShowcases }: { items?: TrainShowcas
   const [direction, setDirection] = useState<'next' | 'previous'>('next')
   const touchStartX = useRef<number | null>(null)
 
+  useEffect(() => {
+    if (items.length < 2) return
+    const autoplay = window.setInterval(() => {
+      setDirection('next')
+      setActiveIndex((index) => (index + 1) % items.length)
+    }, 4500)
+    return () => window.clearInterval(autoplay)
+  }, [items.length])
+
   if (!items.length) return null
 
   const current = items[activeIndex % items.length]

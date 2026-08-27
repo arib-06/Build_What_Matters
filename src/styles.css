@@ -759,9 +759,9 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .train-showcase-link:hover { border-color: var(--ux4g-text-neutral-inverse); background: transparent; color: var(--ux4g-text-neutral-inverse) !important; }
 .train-showcase-visual { isolation: isolate; }
 .train-showcase-visual::after { z-index: 1; background: linear-gradient(180deg, transparent 30%, rgba(12, 9, 24, .84) 100%); }
-.train-showcase-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.train-showcase-image.is-next { animation: showcase-in-next .55s ease both; }
-.train-showcase-image.is-previous { animation: showcase-in-previous .55s ease both; }
+.train-showcase-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; will-change: opacity, transform; }
+.train-showcase-image.is-next { animation: showcase-in-next .72s cubic-bezier(.22, .61, .36, 1) both; }
+.train-showcase-image.is-previous { animation: showcase-in-previous .72s cubic-bezier(.22, .61, .36, 1) both; }
 @keyframes showcase-in-next { from { opacity: .35; transform: translateX(3%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes showcase-in-previous { from { opacity: .35; transform: translateX(-3%); } to { opacity: 1; transform: translateX(0); } }
 .train-showcase-overlay { position: absolute; z-index: 2; right: var(--ux4g-space-8); bottom: var(--ux4g-space-8); left: var(--ux4g-space-8); display: grid; gap: var(--ux4g-space-2); color: var(--ux4g-text-neutral-inverse); }
