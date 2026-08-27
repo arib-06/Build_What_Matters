@@ -146,15 +146,158 @@ export const faqItems = [
 ]
 
 export const mockNotifications = [
-  { id: 'delay', icon: 'schedule', title: 'Platform update', body: 'Platform 4 is assigned for your 06:15 departure.', tone: 'info' as const },
-  { id: 'coach', icon: 'train', title: 'Coach information ready', body: 'Your coach B2 is near the middle of the train.', tone: 'success' as const },
-  { id: 'reminder', icon: 'notifications', title: 'Boarding reminder', body: 'Reach the station at least 30 minutes before departure.', tone: 'warning' as const },
+  { id: 'tatkal', icon: 'bolt', title: 'Tatkal is ready', body: 'Your preferred class opens at 10:00 AM.', tone: 'warning' as const, time: 'Just now' },
+  { id: 'delay', icon: 'schedule', title: 'Platform update', body: 'Platform 4 is assigned for your 06:15 departure.', tone: 'info' as const, time: '2 min ago' },
+  { id: 'coach', icon: 'train', title: 'Coach information ready', body: 'Your coach B2 is near the middle of the train.', tone: 'success' as const, time: '10 min ago' },
+  { id: 'reminder', icon: 'notifications', title: 'Boarding reminder', body: 'Reach the station at least 30 minutes before departure.', tone: 'warning' as const, time: 'Today' },
 ]
 
 export const featureCards = [
   { icon: 'bolt', title: 'Tatkal, without the guesswork', body: 'See opening times, eligible classes, current mock availability, and fare before the clock starts.' },
   { icon: 'family_restroom', title: 'Travel together', body: 'Tell us when you are travelling as a family or group and see seating trade-offs honestly.' },
   { icon: 'support_agent', title: 'Help when it matters', body: 'Understand RAC, waitlist, refunds, and journey changes without leaving your booking.' },
+]
+
+export interface TrainShowcase {
+  id: string
+  eyebrow: string
+  title: string
+  subtitle: string
+  description: string
+  stat: string
+  image: string
+  imageAlt: string
+  infoUrl: string
+}
+
+export const trainShowcases: TrainShowcase[] = [
+  {
+    id: 'vande-bharat',
+    eyebrow: 'NEW GENERATION',
+    title: 'Vande Bharat Express',
+    subtitle: 'India’s semi-high-speed trainset',
+    description: 'Made in India for quicker, more comfortable inter-city journeys.',
+    stat: 'Up to 160 km/h · subject to route readiness',
+    image: '/images/showcase/vande-bharat.png',
+    imageAlt: 'A modern streamlined express train at a station',
+    infoUrl: 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=2215265&lang=1&reg=1',
+  },
+  {
+    id: 'palace-on-wheels',
+    eyebrow: 'ROYAL JOURNEY',
+    title: 'Palace on Wheels',
+    subtitle: 'Luxury across Rajasthan',
+    description: 'Royal interiors, curated heritage stops, and an unhurried seven-night journey.',
+    stat: '7 nights / 8 days · New Delhi round trip',
+    image: '/images/showcase/palace-on-wheels.png',
+    imageAlt: 'A richly appointed luxury train carriage interior',
+    infoUrl: 'https://www.palaceonwheels.rajasthan.gov.in/itinerary.html',
+  },
+  {
+    id: 'rail-power',
+    eyebrow: 'NETWORK IN MOTION',
+    title: 'Powering the railway',
+    subtitle: 'Modern electric traction',
+    description: 'The locomotives and crews that keep India’s long-distance network moving.',
+    stat: 'Built for high-capacity rail corridors',
+    image: '/images/showcase/rail-power.png',
+    imageAlt: 'A blue Indian locomotive on an electrified railway line',
+    infoUrl: 'https://indianrailways.gov.in/',
+  },
+]
+
+export const officialIndianRailwayMapUrl = 'https://indianrailways.gov.in/railwayboard/uploads/PDF/Railway%20Map%20of%20india_Corrected%20up%20to%2031_03_2023.pdf'
+export const officialSurveyOfIndiaOutlineUrl = 'https://surveyofindia.gov.in/pages/outline-maps-of-india'
+
+export interface IndiaRailHub {
+  id: string
+  name: string
+  code: string
+  region: string
+  detail: string
+  mapX: number
+  mapY: number
+}
+
+export const indiaRailHubs: IndiaRailHub[] = [
+  { id: 'amritsar', name: 'Amritsar', code: 'ASR', region: 'North', detail: 'Golden Temple gateway and a northern rail starting point.', mapX: 37, mapY: 16 },
+  { id: 'new-delhi', name: 'New Delhi', code: 'NDLS', region: 'North', detail: 'A central interchange for the Golden Quadrilateral and beyond.', mapX: 45, mapY: 25 },
+  { id: 'mumbai', name: 'Mumbai', code: 'CSMT', region: 'West', detail: 'Where historic routes meet the Konkan coast.', mapX: 35, mapY: 56 },
+  { id: 'kolkata', name: 'Kolkata', code: 'HWH', region: 'East', detail: 'A cultural rail gateway to the eastern hills and coast.', mapX: 63, mapY: 42 },
+  { id: 'guwahati', name: 'Guwahati', code: 'GHY', region: 'North East', detail: 'The rail gateway to Assam and the north-eastern states.', mapX: 70, mapY: 27 },
+  { id: 'bengaluru', name: 'Bengaluru', code: 'SBC', region: 'South', detail: 'A southern hub for hill, coast and heritage journeys.', mapX: 46, mapY: 78 },
+  { id: 'chennai', name: 'Chennai', code: 'MAS', region: 'South', detail: 'A coast-facing junction for the deep south.', mapX: 52, mapY: 81 },
+  { id: 'kochi', name: 'Kochi', code: 'ERS', region: 'South', detail: 'A gentle rail entry into Kerala’s backwaters and coast.', mapX: 43, mapY: 87 },
+]
+
+export const indianLanguages = [
+  { value: 'English', label: 'English', native: 'English' },
+  { value: 'हिन्दी', label: 'Hindi', native: 'हिन्दी' },
+  { value: 'తెలుగు', label: 'Telugu', native: 'తెలుగు' },
+  { value: 'ಕನ್ನಡ', label: 'Kannada', native: 'ಕನ್ನಡ' },
+  { value: 'ਪੰਜਾਬੀ', label: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
+  { value: 'मराठी', label: 'Marathi', native: 'मराठी' },
+  { value: 'বাংলা', label: 'Bengali', native: 'বাংলা' },
+  { value: 'தமிழ்', label: 'Tamil', native: 'தமிழ்' },
+]
+
+export interface HeritageJourney {
+  id: string
+  region: string
+  title: string
+  route: string
+  description: string
+  duration: string
+  image: string
+  imageAlt: string
+  infoUrl: string
+}
+
+export const heritageJourneys: HeritageJourney[] = [
+  {
+    id: 'kalka-shimla',
+    region: 'Himalayan hills',
+    title: 'Kalka–Shimla Toy Train',
+    route: 'Kalka → Shimla',
+    description: 'Slow curves, cedar forests and mountain stations that make the journey part of the destination.',
+    duration: '5h 10m · 96 km',
+    image: '/images/heritage/kalka-shimla.png',
+    imageAlt: 'The red-and-cream Kalka–Shimla toy train crossing a snowy mountain curve',
+    infoUrl: 'https://en.wikipedia.org/wiki/Kalka%E2%80%93Shimla_railway',
+  },
+  {
+    id: 'darjeeling',
+    region: 'Tea country',
+    title: 'Darjeeling Himalayan Railway',
+    route: 'New Jalpaiguri → Darjeeling',
+    description: 'A heritage climb through tea gardens, misty bends and the warm rhythm of hill-town life.',
+    duration: '7h 00m · 88 km',
+    image: '/images/heritage/darjeeling.png',
+    imageAlt: 'A heritage steam locomotive emerging from a stone tunnel in a forest',
+    infoUrl: 'https://en.wikipedia.org/wiki/Darjeeling_Himalayan_Railway',
+  },
+  {
+    id: 'nilgiri',
+    region: 'Blue mountains',
+    title: 'Nilgiri Mountain Railway',
+    route: 'Mettupalayam → Ooty',
+    description: 'A little blue train through eucalyptus slopes, valley views and the quiet of the Nilgiris.',
+    duration: '5h 00m · 46 km',
+    image: '/images/heritage/nilgiri.png',
+    imageAlt: 'A vintage train winding through vivid green Nilgiri tea fields',
+    infoUrl: 'https://5sensestours.com/nilgiri-mountain-railway-tour/',
+  },
+  {
+    id: 'konkan',
+    region: 'Western coast',
+    title: 'Konkan Railway',
+    route: 'Mumbai → Madgaon',
+    description: 'Tunnels, palms and monsoon-green coastlines on one of India’s most cinematic rail corridors.',
+    duration: '10h 30m · 581 km',
+    image: '/images/heritage/konkan.png',
+    imageAlt: 'An Indian blue locomotive curving through lush monsoon forest',
+    infoUrl: 'https://en.wikipedia.org/wiki/Konkan_Railway',
+  },
 ]
 
 export const getStatusLabel = (status: Train['classes'][number]['status']) => {

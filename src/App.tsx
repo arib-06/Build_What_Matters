@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { featureCards, getConfirmedSeatsForSearch, getRegularAvailabilityForSearch, GOOD_ENOUGH_CONFIRMED_SEATS, tatkalTrains, trains } from './data'
+import { featureCards, getConfirmedSeatsForSearch, getRegularAvailabilityForSearch, GOOD_ENOUGH_CONFIRMED_SEATS, heritageJourneys, indiaRailHubs, indianLanguages, officialIndianRailwayMapUrl, officialSurveyOfIndiaOutlineUrl, tatkalTrains, trainShowcases, trains } from './data'
 import type { TatkalTrain } from './data'
 import { findConnectingJourney, stationKey } from './data/mockConnectingJourneys'
 import type { ConnectingJourney } from './data/mockConnectingJourneys'
@@ -14,6 +14,7 @@ import {
   ExplanationModal,
   FAQPanel,
   Icon,
+  IndiaRailMap,
   NotificationDrawer,
   NotificationIconButton,
   PassengerFields,
@@ -21,6 +22,7 @@ import {
   SeatMap,
   StatusTag,
   TatkalCommandCard,
+  TrainShowcase,
   TrainCard,
   defaultPassenger,
   formatDate,
@@ -70,6 +72,8 @@ function App() {
   const [modal, setModal] = useState<{ title: string; body: string } | null>(null)
   const [showNotifications, setShowNotifications] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [language, setLanguage] = useState('English')
+  const [selectedHub, setSelectedHub] = useState('new-delhi')
   const [bookingStage, setBookingStageRaw] = useState<BookingStage>('passengers')
   const [selectedSeats, setSelectedSeats] = useState<string[]>(['21', '22'])
   const [selectedCoach, setSelectedCoach] = useState('B2')
@@ -88,7 +92,8 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-  }, [theme])
+    document.documentElement.lang = ({ English: 'en', 'हिन्दी': 'hi', 'తెలుగు': 'te', 'ಕನ್ನಡ': 'kn', 'ਪੰਜਾਬੀ': 'pa', 'मराठी': 'mr', 'বাংলা': 'bn', 'தமிழ்': 'ta' } as Record<string, string>)[language] ?? 'en'
+  }, [theme, language])
 
   const navigate = (nextView: View) => {
     setView(nextView)
@@ -213,21 +218,35 @@ function App() {
     navigate('booking')
   }
 
-  const renderHome = () => (
-    <>
-      <section className="hero-section page-container">
-        <div className="hero-copy">
-          <StatusTag tone="brand" icon="train">A calmer way to travel by rail</StatusTag>
-          <h1>Book the journey.<br /><span>Understand every step.</span></h1>
-          <p>RailConnect keeps the familiar railway booking essentials and makes the hard parts—Tatkal, RAC, waitlist, seats, payments, and refunds—easier to understand.</p>
-          <div className="hero-proof"><span><Icon name="check_circle" /> Clear status language</span><span><Icon name="check_circle" /> Family-friendly choices</span><span><Icon name="check_circle" /> Accessible by default</span></div>
+  const renderHome = () => {
+    const activeHub = indiaRailHubs.find((hub) => hub.id === selectedHub) ?? indiaRailHubs[1]
+    return <>
+      <section className="home-hero page-container">
+        <div className="home-hero-copy">
+          <h1>Find your way across <span>India.</span></h1>
+          <p>Find your route, book with confidence, and enjoy the journey.</p>
+          <div className="hero-actions"><button className="ux4g-btn ux4g-btn-primary ux4g-btn-md" type="button" onClick={() => document.getElementById('home-search')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>Plan a journey <Icon name="arrow_forward" /></button><button className="ux4g-btn ux4g-btn-text-primary ux4g-btn-md" type="button" onClick={() => document.getElementById('india-network')?.scrollIntoView({ behavior: 'smooth' })}>Explore the rail map <Icon name="map" /></button></div>
         </div>
-        <SearchForm value={search} onChange={updateSearch} onSubmit={runSearch} />
+        <div className="home-search-panel" id="home-search"><div className="home-search-intro"><h2>Where will you go next?</h2></div><SearchForm value={search} onChange={updateSearch} onSubmit={runSearch} /></div>
       </section>
-      <section className="page-container section-block"><div className="section-heading"><div><p className="eyebrow">Designed around real friction</p><h2>Less decoding. More confidence.</h2></div><button className="ux4g-btn ux4g-btn-text-primary ux4g-btn-md" type="button" onClick={() => navigate('support')}>Explore help <Icon name="arrow_forward" /></button></div><div className="feature-grid">{featureCards.map((feature) => <article className="ux4g-card ux4g-card-solid ux4g-card-vertical feature-card" key={feature.title}><div className="feature-icon"><Icon name={feature.icon} /></div><h3>{feature.title}</h3><p>{feature.body}</p><button className="ux4g-text-link-md" type="button" onClick={() => navigate(feature.title.includes('Tatkal') ? 'results' : 'support')}>See how it works <Icon name="arrow_forward" /></button></article>)}</div></section>
+
+      <section className="india-network-section page-container section-block" id="india-network">
+        <div className="section-heading network-heading"><div><p className="eyebrow">India by rail</p><h2>Choose your gateway.</h2><p>Select a city to explore the network.</p></div><StatusTag tone="info" icon="verified_user">Official outline</StatusTag></div>
+        <div className="network-layout">
+          <div className="india-map-card ux4g-card ux4g-card-solid ux4g-card-vertical"><div className="map-card-toolbar"><div><span className="map-card-kicker"><span className="map-live-dot" /> Indian Railways network</span><strong>India-wide view</strong></div><span className="map-card-date">Route map · 31 Mar 2023</span></div><IndiaRailMap selectedHub={selectedHub} onSelect={setSelectedHub} /><div className="map-legend"><span><i className="legend-line primary" /> Main corridor</span><span><i className="legend-line secondary" /> Connecting route</span><span><i className="legend-node" /> Rail gateway</span></div></div>
+          <aside className="network-detail-card ux4g-card ux4g-card-outline ux4g-card-vertical"><div className="network-detail-top"><p className="eyebrow">Selected gateway</p><span className="network-detail-index">{String(indiaRailHubs.findIndex((hub) => hub.id === activeHub.id) + 1).padStart(2, '0')} / {String(indiaRailHubs.length).padStart(2, '0')}</span></div><div className="network-detail-title"><span className="network-detail-icon"><Icon name="train" /></span><div><span>{activeHub.region} corridor</span><h3>{activeHub.name}</h3><strong>{activeHub.code}</strong></div></div><p>{activeHub.detail}</p><div className="network-source-links"><a className="source-link" href={officialIndianRailwayMapUrl} target="_blank" rel="noreferrer">Official route map <Icon name="open_in_new" /></a><a className="source-link" href={officialSurveyOfIndiaOutlineUrl} target="_blank" rel="noreferrer">India outline source <Icon name="open_in_new" /></a></div><p className="network-source-note"><Icon name="info" /> Official outline · simplified rail corridors.</p></aside>
+        </div>
+      </section>
+
+      <TrainShowcase items={trainShowcases} />
+
+      <section className="discover-section page-container section-block" id="discover-india"><div className="section-heading"><div><p className="eyebrow">Discover India by train</p><h2>Take the scenic route.</h2></div></div><div className="heritage-grid">{heritageJourneys.map((journey, index) => <article className={`heritage-card ux4g-card ux4g-card-solid ux4g-card-vertical ${index === 0 ? 'is-featured' : ''}`} key={journey.id}><div className="heritage-card-image"><img src={journey.image} alt={journey.imageAlt} loading="lazy" /><div className="heritage-card-image-top"><StatusTag tone="brand">{journey.region}</StatusTag><span className="toy-train"><Icon name="train" /></span></div></div><div className="heritage-card-copy"><p className="heritage-card-route">{journey.route}</p><h3>{journey.title}</h3><p>{journey.description}</p><div className="heritage-card-footer"><span><Icon name="schedule" /> {journey.duration}</span><a className="ux4g-text-link-md" href={journey.infoUrl} target="_blank" rel="noreferrer">Know more <Icon name="open_in_new" /></a></div></div></article>)}</div><div className="heritage-track" aria-hidden="true"><span className="track-train"><Icon name="train" /></span><i /><i /><i /><i /><i /></div></section>
+
+      <section className="page-container section-block confidence-section"><div className="section-heading"><div><p className="eyebrow">Designed around real friction</p><h2>Less decoding. More confidence.</h2></div><button className="ux4g-btn ux4g-btn-text-primary ux4g-btn-md" type="button" onClick={() => navigate('support')}>Explore help <Icon name="arrow_forward" /></button></div><div className="feature-grid">{featureCards.map((feature) => <article className="ux4g-card ux4g-card-solid ux4g-card-vertical feature-card" key={feature.title}><div className="feature-icon"><Icon name={feature.icon} /></div><h3>{feature.title}</h3><p>{feature.body}</p><button className="ux4g-text-link-md" type="button" onClick={() => navigate(feature.title.includes('Tatkal') ? 'results' : 'support')}>See how it works <Icon name="arrow_forward" /></button></article>)}</div></section>
+
       <section className="page-container section-block journey-principles"><div className="principles-copy"><p className="eyebrow">The booking promise</p><h2>Explain before asking.</h2><p>Every important decision comes with context: what a status means, what may change, what you will pay, and what happens next.</p><div className="principle-list"><div><span className="principle-number">01</span><div><strong>See the trade-off</strong><p>Keep a group together, choose a lower fare, or arrive earlier—without hidden assumptions.</p></div></div><div><span className="principle-number">02</span><div><strong>Know the state</strong><p>Payment received is never presented as booking confirmed until that state is actually reached.</p></div></div><div><span className="principle-number">03</span><div><strong>Get help in context</strong><p>Ask about RAC, coaches, refunds, and delays without losing your place in the journey.</p></div></div></div></div><div className="journey-visual ux4g-card ux4g-card-outline ux4g-card-vertical"><div className="journey-visual-top"><StatusTag tone="success" icon="check_circle">Journey ready</StatusTag><span>Mock PNR · 4512367890</span></div><div className="journey-route"><div><strong>CDG</strong><span>Chandigarh</span></div><div className="visual-line"><span /><i /><span /></div><div><strong>NDLS</strong><span>New Delhi</span></div></div><div className="journey-visual-footer"><span><Icon name="schedule" /> 06:15 · 25 Aug</span><span><Icon name="airline_seat_recline_normal" /> B2 · 21, 22</span></div></div></section>
     </>
-  )
+  }
 
   const renderResults = () => {
     const connecting = findConnectingJourney(search.source, search.destination)
@@ -289,7 +308,7 @@ function App() {
 
   const renderSupport = () => <div className="support-page page-container"><div className="support-hero"><div><StatusTag tone="brand" icon="support_agent">Support centre</StatusTag><h1>Help that knows where you are in the journey.</h1><p>Get plain-language explanations for railway terms, booking problems, refunds, and journey updates.</p></div><div className="support-search"><label className="ux4g-form-group"><span>Search help</span><div className="ux4g-input-container ux4g-input-md ux4g-input-default"><Icon name="search" /><input placeholder="Try “What does RAC mean?”" /></div></label><button className="ux4g-btn ux4g-btn-primary ux4g-btn-md" type="button">Search help</button></div></div><div className="support-grid"><main><div className="section-heading"><div><p className="eyebrow">Popular questions</p><h2>Start with an answer</h2></div><StatusTag tone="info">Plain language</StatusTag></div><FAQPanel /><div className="support-options"><article className="ux4g-card ux4g-card-outline ux4g-card-vertical"><Icon name="receipt_long" /><h3>Booking-specific support</h3><p>Get help with payment, cancellation, refunds, and status changes for a specific journey.</p><button className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-md" type="button" onClick={() => navigate('journey')}>Open a journey <Icon name="arrow_forward" /></button></article><article className="ux4g-card ux4g-card-outline ux4g-card-vertical"><Icon name="person" /><h3>Talk to a human</h3><p>Escalate a problem when the assistant or help centre cannot resolve it.</p><button className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-md" type="button" onClick={() => setModal({ title: 'Human support is a prototype path', body: 'In production this would create a support case with your booking context. No case is actually submitted from this demo.' })}>See escalation path</button></article></div></main><aside><AssistantPanel /></aside></div></div>
 
-  return <div className="app-root"><a className="skip-link" href="#main-content">Skip to main content</a><div className="ux4g-topbar"><div className="ux4g-topbar__wrap page-container"><span>Government-ready railway booking prototype</span><div className="topbar-actions"><button type="button" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}><Icon name={theme === 'light' ? 'dark_mode' : 'light_mode'} /> {theme === 'light' ? 'Dark mode' : 'Light mode'}</button><span className="topbar-divider" /><button type="button" onClick={() => setModal({ title: 'Accessibility first', body: 'This prototype uses semantic landmarks, visible focus, keyboard-friendly controls, readable status copy, and touch-sized interactive targets. Use your browser zoom to test the layout.' })}>Accessibility</button></div></div></div><header className="ux4g-navbar app-navbar"><div className="ux4g-navbar-wrap page-container"><button className="brand-lockup" type="button" onClick={() => navigate('home')}><span className="brand-mark"><Icon name="train" /></span><span><strong>RailConnect</strong><small>Indian railway booking</small></span></button><nav className="main-nav" aria-label="Main navigation"><button className={`nav-link ${view === 'home' ? 'active' : ''}`} type="button" onClick={() => navigate('home')}>Book a journey</button><button className={`nav-link ${view === 'journey' ? 'active' : ''}`} type="button" onClick={() => navigate('journey')}>Trips & PNR</button><button className={`nav-link ${view === 'support' ? 'active' : ''}`} type="button" onClick={() => navigate('support')}>Help centre</button></nav><div className="navbar-actions"><NotificationIconButton count={3} onClick={() => setShowNotifications(true)} /><button className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm" type="button">Sign in</button></div></div></header><main id="main-content">{view === 'home' ? renderHome() : null}{view === 'results' ? <>{renderResults()}{renderTatkalFallback()}</> : null}{view === 'booking' ? renderBooking() : null}{view === 'journey' ? renderJourney() : null}{view === 'support' ? renderSupport() : null}</main><footer className="ux4g-footer-wrapper ux4g-footer-primary app-footer"><div className="ux4g-footer-row page-container"><div><strong>RailConnect</strong><p>A clearer prototype for a complex public-service journey.</p></div><div className="footer-links"><button type="button" onClick={() => navigate('support')}>Help centre</button><button type="button" onClick={() => setModal({ title: 'About this prototype', body: 'RailConnect is a UX4G-based competition prototype. It preserves core railway concepts while making statuses, trade-offs, and next steps clearer.' })}>About</button><span>© 2026 Prototype</span></div></div></footer>{modal ? <ExplanationModal title={modal.title} body={modal.body} onClose={() => setModal(null)} /> : null}{showNotifications ? <NotificationDrawer onClose={() => setShowNotifications(false)} /> : null}</div>
+ return <div className="app-root"><a className="skip-link" href="#main-content">Skip to main content</a><div className="ux4g-topbar"><div className="ux4g-topbar__wrap page-container"><div className="topbar-actions"><button type="button" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}><Icon name={theme === 'light' ? 'dark_mode' : 'light_mode'} /> {theme === 'light' ? 'Dark mode' : 'Light mode'}</button><span className="topbar-divider" /><button type="button" onClick={() => setModal({ title: 'Accessibility first', body: 'This prototype uses semantic landmarks, visible focus, keyboard-friendly controls, readable status copy, and touch-sized interactive targets. Use your browser zoom to test the layout.' })}>Accessibility</button></div></div></div><header className="ux4g-navbar app-navbar"><div className="ux4g-navbar-wrap page-container"><button className="brand-lockup" type="button" onClick={() => navigate('home')}><span className="brand-mark"><img className="brand-logo" src="/images/india-connect-logo.png" alt="" aria-hidden="true" /></span><span><strong>India Connect</strong><small>Indian railway booking</small></span></button><nav className="main-nav" aria-label="Main navigation"><button className={`nav-link ${view === 'home' ? 'active' : ''}`} type="button" onClick={() => navigate('home')}>Book a journey</button><button className={`nav-link ${view === 'journey' ? 'active' : ''}`} type="button" onClick={() => navigate('journey')}>Trips & PNR</button><button className={`nav-link ${view === 'support' ? 'active' : ''}`} type="button" onClick={() => navigate('support')}>Help centre</button></nav><div className="navbar-actions"><label className="navbar-language"><Icon name="translate" /><select aria-label="Preferred language" value={language} onChange={(event) => setLanguage(event.target.value)}>{indianLanguages.map((item) => <option value={item.value} key={item.value}>{item.native} · {item.label}</option>)}</select></label><NotificationIconButton count={4} onClick={() => setShowNotifications(true)} /><button className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-sm" type="button">Sign in</button></div></div></header><main id="main-content">{view === 'home' ? renderHome() : null}{view === 'results' ? <>{renderResults()}{renderTatkalFallback()}</> : null}{view === 'booking' ? renderBooking() : null}{view === 'journey' ? renderJourney() : null}{view === 'support' ? renderSupport() : null}</main><footer className="ux4g-footer-wrapper ux4g-footer-primary app-footer"><div className="ux4g-footer-row page-container"><div><strong>India Connect</strong><p>A clearer prototype for a complex public-service journey.</p></div><div className="footer-links"><button type="button" onClick={() => navigate('support')}>Help centre</button><button type="button" onClick={() => setModal({ title: 'About this prototype', body: 'India Connect is a UX4G-based competition prototype. It preserves core railway concepts while making statuses, trade-offs, and next steps clearer.' })}>About</button><span>© 2026 Prototype</span></div></div></footer>{modal ? <ExplanationModal title={modal.title} body={modal.body} onClose={() => setModal(null)} /> : null}{showNotifications ? <NotificationDrawer onClose={() => setShowNotifications(false)} /> : null}</div>
 }
 
 function ReviewCard({ booking }: { booking: BookingState }) {

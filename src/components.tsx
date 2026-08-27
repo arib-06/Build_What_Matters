@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent, ReactNode } from 'react'
-import { faqItems, getStatusLabel, getStatusTone, mockNotifications, tatkalTrains } from './data'
-import type { TatkalTrain } from './data'
+import { faqItems, getStatusLabel, getStatusTone, indiaRailHubs, mockNotifications, tatkalTrains, trainShowcases } from './data'
+import type { TatkalTrain, TrainShowcase } from './data'
 import { buildComparisonRows } from './lib/comparison'
 import type { ScoredTrain } from './lib/scoring'
 import { getWaitlistInsight } from './lib/explain'
@@ -20,6 +20,97 @@ export function StatusTag({ tone, children, icon }: { tone: StatusTone; children
       {children}
     </span>
   )
+}
+
+export function IndiaRailMap({ selectedHub, onSelect }: { selectedHub: string; onSelect: (hubId: string) => void }) {
+  return <div className="india-map-stage">
+    <svg className="india-map-svg" viewBox="0 0 760 620" role="img" aria-labelledby="india-map-title india-map-description">
+      <title id="india-map-title">Indian railway network over an India outline</title>
+      <desc id="india-map-description">A readable rail corridor overlay on the official Survey of India outline, with selectable gateways around the country.</desc>
+      <defs>
+        <linearGradient id="india-map-fill" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" className="map-gradient-start" />
+          <stop offset="1" className="map-gradient-end" />
+        </linearGradient>
+        <filter id="map-shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="14" stdDeviation="12" floodOpacity=".14" />
+        </filter>
+        <clipPath id="india-map-clip"><use href="#india-map-outline" /></clipPath>
+      </defs>
+      {/*
+        <path id="india-map-outline" className="india-map-silhouette" filter="url(#map-shadow)" fill="url(#india-map-fill)" d="M301.7 18.5 303.6 21.4 307.8 18.9 312.2 28.8 320.3 36.3 321.7 43 327.2 45.8 327.3 50.5 333.2 51.1 333 48.1 334.7 49.4 337.8 44.7 344.8 43.8 346.8 40.8 350.6 44.6 353.2 44 356.1 48.6 353.7 65.9 350.8 67.5 351 70.2 348.3 70.3 349 74.7 347.4 79 342.3 79.8 344 86.5 342.1 86.4 342.8 91.9 347.5 93.4 346.3 98.1 349.1 103.7 342.6 111 340.5 104.2 337.4 106.3 337.5 112.8 340.8 117.6 339.9 121.5 341.4 124.9 340.1 126.7 341.9 131.6 344.2 128.3 347.2 136 351.6 137 355.5 141.1 355.7 145 363.7 150.9 356.8 160.4 353.8 177.9 365.7 186.6 366.8 190.9 372.8 196 374.7 194.7 378.8 199.3 381.5 198.3 381.8 202.5 388 205.6 388.7 202.7 393.7 205 396.6 201.6 401.7 204.8 402.1 210.3 408.2 215.4 412.6 213 415 218.6 420.1 217.3 424.4 220.6 427.9 217.3 430.9 221.5 436.6 218.4 438 220.7 439.6 213.2 437.3 206.4 438.4 190.3 443.1 186.7 445.6 188.6 445.1 197.2 446.9 201.6 445.2 205.1 449.6 211.1 457.4 212.3 462.4 207.9 466.3 209.9 480.4 206.6 480.6 198.2 479.3 194.7 475.5 195.2 474.1 188.3 478.1 190.3 481 187.1 484.6 187.5 486.4 184 485.7 181.5 491 177 491.8 170.9 498 169.4 500.5 161 504.4 155.5 506.4 158.6 512.9 160 514.3 155.3 519.2 150.6 522.6 153.9 519.9 157.8 520.8 161.1 524.2 157.1 525.6 162.4 522.4 170.1 531.3 169.6 534.5 171.6 535 175.3 530.2 183.9 533.5 193.1 528.5 188.7 523.7 191.4 513.2 205.9 514.3 216 511.9 226.1 509.3 229.8 510.7 238.3 506 259.6 496.8 256.7 498.5 274.4 495.8 276.5 497.5 291.1 494.6 297.6 492.1 293.9 491.2 297.4 485.9 265.2 482.4 265.4 482.8 270.1 480.8 273.8 481.8 277.6 479.6 280.8 477.5 275 476.4 278.1 473.9 268.8 475.8 259.2 478.1 259.5 479.6 256 481.4 257.9 481.4 254.1 484 252.2 484.2 243 487 243.2 486.1 240.3 482.2 237.9 464.8 240.9 458.3 238.8 458.2 226.5 455.8 221.2 454.9 226.4 452.5 225.9 449.4 218.9 447.5 218.9 449.1 221.9 445 221.9 445.8 220.2 441.9 215.3 441.3 218.1 443.5 220.2 439.9 224.5 439.5 231.2 441.2 230.8 444.2 236.2 447.1 235.7 449.4 240.3 443.4 242.2 443.1 247 440.3 247.4 439.1 252.6 442.8 257.7 447.2 259.2 447.8 264.8 445.8 267.2 445.8 271.3 448.5 273.9 447.8 278.5 450.8 279 449.3 283 452.6 303 449.7 303.2 450.4 309.2 449.5 305.4 449.9 308.4 448.6 307 449.1 302 447.1 302.3 446 306.4 444.1 306.6 443.9 311 443 299.6 440.2 297.9 442.8 300.7 438.9 308.6 431.5 312.9 429.1 316.8 428.7 321.1 431.3 328 424.5 342.7 416 347.9 408.3 356.8 399.6 375.6 379.5 400.1 379.5 409.6 372.8 414.6 368 414.7 363.8 426 360.9 422.8 356.3 426.6 353.6 438.2 357.1 472.6 354.9 488.2 350.2 504.4 351.6 530 344.6 530.7 340.1 543.8 341.2 548.8 344.8 548.9 346.2 552.2 340.7 549.9 333.8 553 331.1 556.6 329.6 567.3 323.3 572.9 316.8 567.3 311.3 556.4 302.4 508.3 296.3 495.5 287.6 446.7 282.7 435.6 281 423.1 278 416.8 272.7 367.3 274.3 362.9 273.1 360 272.2 362.2 272.8 354 271 344.2 274.3 330.5 273.6 323.5 271.5 320.5 272.5 313.9 271.3 314.5 275.6 310 271 309.8 273.4 304.2 271 304.2 271.8 299.7 273.9 300.7 274.7 298.5 267.6 303.8 268.4 310.3 266 318.1 251.4 326.3 244.5 319.1 232 293.4 233.6 290.4 233.2 292.1 234.9 291.7 234.3 295.9 240.8 291.2 241.4 293.3 245.1 291.7 249.9 284.1 248.9 283 254.8 279.3 247.6 278 246.6 283 245.8 281.4 238.2 285.4 229.4 276.1 230.5 274.1 228.2 269.5 230.8 264.2 227.2 268.5 225 267.8 227.2 261.3 231.6 261.9 232.5 255.5 233 257.5 240.9 257 245.4 259.8 251.4 255.7 252.9 259.8 257.4 256.7 256.1 255.8 257.4 251.3 253.3 237.5 253.5 231.7 249.3 231 247.7 226.6 249 215.1 242.1 210.7 243.3 202.5 252.3 187.8 254.5 188.1 257.3 194.1 268.2 190.4 273.9 175.5 279.8 171.1 285 154.1 291 149.7 290.8 144.1 298.9 133.5 297 132.3 298.3 117.9 306.2 112 303.6 107 299.4 106.6 299.7 99.8 296.2 101 289.1 94.5 287.9 66.8 294 60.4 295.1 55.9 291 53.5 291.8 47.7 288.1 46.8 285.2 40.4 281.3 41.1 279.7 38.8 280.5 32.7 284.5 29.1 285.5 24.4 293.4 25 291.5 20.8 295.1 23 301.7 18.5Z" />
+      */}
+      <g className="india-map-art" transform="translate(-233 0) scale(1.613 1)">
+        <path id="india-map-outline" className="india-map-silhouette" filter="url(#map-shadow)" fill="url(#india-map-fill)" d="M301.7 18.5 303.6 21.4 307.8 18.9 312.2 28.8 320.3 36.3 321.7 43 327.2 45.8 327.3 50.5 333.2 51.1 333 48.1 334.7 49.4 337.8 44.7 344.8 43.8 346.8 40.8 350.6 44.6 353.2 44 356.1 48.6 353.7 65.9 350.8 67.5 351 70.2 348.3 70.3 349 74.7 347.4 79 342.3 79.8 344 86.5 342.1 86.4 342.8 91.9 347.5 93.4 346.3 98.1 349.1 103.7 342.6 111 340.5 104.2 337.4 106.3 337.5 112.8 340.8 117.6 339.9 121.5 341.4 124.9 340.1 126.7 341.9 131.6 344.2 128.3 347.2 136 351.6 137 355.5 141.1 355.7 145 363.7 150.9 356.8 160.4 353.8 177.9 365.7 186.6 366.8 190.9 372.8 196 374.7 194.7 378.8 199.3 381.5 198.3 381.8 202.5 388 205.6 388.7 202.7 393.7 205 396.6 201.6 401.7 204.8 402.1 210.3 408.2 215.4 412.6 213 415 218.6 420.1 217.3 424.4 220.6 427.9 217.3 430.9 221.5 436.6 218.4 438 220.7 439.6 213.2 437.3 206.4 438.4 190.3 443.1 186.7 445.6 188.6 445.1 197.2 446.9 201.6 445.2 205.1 449.6 211.1 457.4 212.3 462.4 207.9 466.3 209.9 480.4 206.6 480.6 198.2 479.3 194.7 475.5 195.2 474.1 188.3 478.1 190.3 481 187.1 484.6 187.5 486.4 184 485.7 181.5 491 177 491.8 170.9 498 169.4 500.5 161 504.4 155.5 506.4 158.6 512.9 160 514.3 155.3 519.2 150.6 522.6 153.9 519.9 157.8 520.8 161.1 524.2 157.1 525.6 162.4 522.4 170.1 531.3 169.6 534.5 171.6 535 175.3 530.2 183.9 533.5 193.1 528.5 188.7 523.7 191.4 513.2 205.9 514.3 216 511.9 226.1 509.3 229.8 510.7 238.3 506 259.6 496.8 256.7 498.5 274.4 495.8 276.5 497.5 291.1 494.6 297.6 492.1 293.9 491.2 297.4 485.9 265.2 482.4 265.4 482.8 270.1 480.8 273.8 481.8 277.6 479.6 280.8 477.5 275 476.4 278.1 473.9 268.8 475.8 259.2 478.1 259.5 479.6 256 481.4 257.9 481.4 254.1 484 252.2 484.2 243 487 243.2 486.1 240.3 482.2 237.9 464.8 240.9 458.3 238.8 458.2 226.5 455.8 221.2 454.9 226.4 452.5 225.9 449.4 218.9 447.5 218.9 449.1 221.9 445 221.9 445.8 220.2 441.9 215.3 441.3 218.1 443.5 220.2 439.9 224.5 439.5 231.2 441.2 230.8 444.2 236.2 447.1 235.7 449.4 240.3 443.4 242.2 443.1 247 440.3 247.4 439.1 252.6 442.8 257.7 447.2 259.2 447.8 264.8 445.8 267.2 445.8 271.3 448.5 273.9 447.8 278.5 450.8 279 449.3 283 452.6 303 449.7 303.2 450.4 309.2 449.5 305.4 449.9 308.4 448.6 307 449.1 302 447.1 302.3 446 306.4 444.1 306.6 443.9 311 443 299.6 440.2 297.9 442.8 300.7 438.9 308.6 431.5 312.9 429.1 316.8 428.7 321.1 431.3 328 424.5 342.7 416 347.9 408.3 356.8 399.6 375.6 379.5 400.1 379.5 409.6 372.8 414.6 368 414.7 363.8 426 360.9 422.8 356.3 426.6 353.6 438.2 357.1 472.6 354.9 488.2 350.2 504.4 351.6 530 344.6 530.7 340.1 543.8 341.2 548.8 344.8 548.9 346.2 552.2 340.7 549.9 333.8 553 331.1 556.6 329.6 567.3 323.3 572.9 316.8 567.3 311.3 556.4 302.4 508.3 296.3 495.5 287.6 446.7 282.7 435.6 281 423.1 278 416.8 272.7 367.3 274.3 362.9 273.1 360 272.2 362.2 272.8 354 271 344.2 274.3 330.5 273.6 323.5 271.5 320.5 272.5 313.9 271.3 314.5 275.6 310 271 309.8 273.4 304.2 271 304.2 271.8 299.7 273.9 300.7 274.7 298.5 267.6 303.8 268.4 310.3 266 318.1 251.4 326.3 244.5 319.1 232 293.4 233.6 290.4 233.2 292.1 234.9 291.7 234.3 295.9 240.8 291.2 241.4 293.3 245.1 291.7 249.9 284.1 248.9 283 254.8 279.3 247.6 278 246.6 283 245.8 281.4 238.2 285.4 229.4 276.1 230.5 274.1 228.2 269.5 230.8 264.2 227.2 268.5 225 267.8 227.2 261.3 231.6 261.9 232.5 255.5 233 257.5 240.9 257 245.4 259.8 251.4 255.7 252.9 259.8 257.4 256.7 256.1 255.8 257.4 251.3 253.3 237.5 253.5 231.7 249.3 231 247.7 226.6 249 215.1 242.1 210.7 243.3 202.5 252.3 187.8 254.5 188.1 257.3 194.1 268.2 190.4 273.9 175.5 279.8 171.1 285 154.1 291 149.7 290.8 144.1 298.9 133.5 297 132.3 298.3 117.9 306.2 112 303.6 107 299.4 106.6 299.7 99.8 296.2 101 289.1 94.5 287.9 66.8 294 60.4 295.1 55.9 291 53.5 291.8 47.7 288.1 46.8 285.2 40.4 281.3 41.1 279.7 38.8 280.5 32.7 284.5 29.1 285.5 24.4 293.4 25 291.5 20.8 295.1 23 301.7 18.5Z" />
+      <g clipPath="url(#india-map-clip)">
+        <g className="map-state-lines" aria-hidden="true">
+          <path d="M304 132C345 145 388 152 430 169c36 15 69 35 98 60" />
+          <path d="M253 215c41 16 76 34 105 64 29 30 47 64 82 73 31 8 66 6 105 30" />
+          <path d="M236 311c38 3 70 19 96 48 23 26 37 60 50 91" />
+          <path d="M388 155c-3 49 18 82 20 127 2 45-16 89-33 128" />
+          <path d="M477 215c-16 32-10 67 12 95 21 26 25 52 12 82" />
+        </g>
+        <g className="map-routes" aria-hidden="true">
+          <path className="map-route map-route-primary" d="M330 101C348 122 362 141 378 157c34 16 68 34 96 55 25 18 44 38 58 57 12 14 22 23 29 29" />
+          <path className="map-route map-route-secondary" d="M378 157c-16 39-35 78-54 119-17 37-34 72-47 98 17 25 39 44 57 62 15 17 19 40 13 68" />
+          <path className="map-route map-route-secondary" d="M347 436c13 19 30 34 49 48 20 16 30 27 35 28" />
+          <path className="map-route map-route-tertiary" d="M378 157c8 40 18 83 18 126 1 43-12 84-28 126-10 28-18 54-21 95" />
+          <path className="map-route map-route-tertiary" d="M474 212c-7 36-18 72-30 106-13 36-24 75-31 111-6 31-15 59-24 82" />
+          <path className="map-route map-route-tertiary" d="M347 504c-11 23-19 47-24 72" />
+          <path className="map-route map-route-primary" d="M474 212c24 20 35 45 51 69 12 18 24 27 38 31" />
+        </g>
+        <g className="map-network-nodes" aria-hidden="true">
+          {[['330', '101'], ['348', '122'], ['362', '141'], ['378', '157'], ['406', '171'], ['434', '187'], ['458', '202'], ['474', '212'], ['492', '229'], ['509', '250'], ['529', '272'], ['548', '297'], ['361', '198'], ['343', '238'], ['326', '276'], ['310', '315'], ['294', '350'], ['277', '374'], ['292', '397'], ['312', '418'], ['332', '438'], ['347', '456'], ['356', '479'], ['347', '504'], ['342', '532'], ['330', '557'], ['396', '283'], ['397', '326'], ['388', '368'], ['378', '409'], ['369', '452'], ['363', '479'], ['474', '244'], ['463', '282'], ['451', '318'], ['439', '357'], ['428', '397'], ['417', '436'], ['406', '474'], ['395', '512']].map(([cx, cy]) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4.5" />)}
+        </g>
+        </g>
+      </g>
+    </svg>
+    <div className="map-hubs">
+      {indiaRailHubs.map((hub) => <button className={`map-hub map-hub-${hub.id} ${selectedHub === hub.id ? 'is-selected' : ''}`} key={hub.id} type="button" style={{ left: `${hub.mapX}%`, top: `${hub.mapY}%` }} onClick={() => onSelect(hub.id)} aria-pressed={selectedHub === hub.id}>
+        <span className="map-hub-pin"><Icon name="train" /></span><span className="map-hub-label"><strong>{hub.name}</strong><small>{hub.code}</small></span>
+      </button>)}
+    </div>
+  </div>
+}
+
+export function TrainShowcase({ items = trainShowcases }: { items?: TrainShowcase[] }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [direction, setDirection] = useState<'next' | 'previous'>('next')
+  const touchStartX = useRef<number | null>(null)
+
+  if (!items.length) return null
+
+  const current = items[activeIndex % items.length]
+  const move = (offset: number) => {
+    setDirection(offset > 0 ? 'next' : 'previous')
+    setActiveIndex((index) => (index + offset + items.length) % items.length)
+  }
+
+  return <section className="heritage-feature train-showcase page-container section-block" aria-labelledby={`train-showcase-title-${current.id}`}>
+    <div className="heritage-feature-copy train-showcase-copy">
+      <p className="eyebrow">{current.eyebrow}</p>
+      <h2 id={`train-showcase-title-${current.id}`} aria-live="polite">{current.title}</h2>
+      <p className="train-showcase-subtitle">{current.subtitle}</p>
+      <p className="train-showcase-description">{current.description}</p>
+      <span className="train-showcase-stat"><Icon name="verified" /> {current.stat}</span>
+      <a className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-md train-showcase-link" href={current.infoUrl} target="_blank" rel="noreferrer">Learn about this train <Icon name="open_in_new" /></a>
+    </div>
+    <div className="heritage-feature-visual train-showcase-visual" onTouchStart={(event) => { touchStartX.current = event.changedTouches[0]?.clientX ?? null }} onTouchEnd={(event) => {
+      const start = touchStartX.current
+      const end = event.changedTouches[0]?.clientX
+      touchStartX.current = null
+      if (start == null || end == null || Math.abs(end - start) < 40) return
+      move(end < start ? 1 : -1)
+    }}>
+      <img key={`${current.id}-${direction}`} className={`train-showcase-image is-${direction}`} src={current.image} alt={current.imageAlt} loading="lazy" />
+      <div className="train-showcase-overlay"><span>{current.subtitle}</span><strong>{current.title}</strong><small>{current.stat}</small></div>
+      <div className="train-showcase-controls" aria-label="Train showcase controls">
+        <button className="ux4g-icon-btn ux4g-icon-btn-outline-primary ux4g-icon-btn-md" type="button" aria-label="Previous train" onClick={() => move(-1)}><Icon name="chevron_left" /></button>
+        <span aria-live="polite">{String((activeIndex % items.length) + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}</span>
+        <button className="ux4g-icon-btn ux4g-icon-btn-outline-primary ux4g-icon-btn-md" type="button" aria-label="Next train" onClick={() => move(1)}><Icon name="chevron_right" /></button>
+      </div>
+    </div>
+  </section>
 }
 
 export function WaitlistExplainer({ status, position, outlook }: { status: 'GNWL' | 'RLWL' | 'PQWL' | 'TQWL' | 'RAC'; position?: number; outlook?: 'Likely to confirm' | 'Possible' | 'Unlikely to confirm' }) {
@@ -332,7 +423,7 @@ export function NotificationDrawer({ onClose }: { onClose: () => void }) {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
-  return <div className="drawer-layer" role="presentation" onMouseDown={onClose}><aside className="ux4g-drawer ux4g-drawer-right app-drawer" role="dialog" aria-modal="true" aria-labelledby="notifications-title" onMouseDown={(event) => event.stopPropagation()}><div className="drawer-header"><div><p className="eyebrow">Your updates</p><h2 id="notifications-title">Notifications</h2></div><button className="ux4g-icon-btn ux4g-icon-btn-text-primary ux4g-icon-btn-md" type="button" aria-label="Close notifications" onClick={onClose}><Icon name="close" /></button></div><div className="notification-list">{mockNotifications.map((notification) => <div className="notification-item" key={notification.id}><StatusTag tone={notification.tone} icon={notification.icon}>New</StatusTag><h3>{notification.title}</h3><p>{notification.body}</p><span>Mock journey update</span></div>)}</div><div className="drawer-footnote"><Icon name="info" /><p>Live notifications will appear here when a railway service is connected.</p></div></aside></div>
+  return <div className="drawer-layer" role="presentation" onMouseDown={onClose}><aside className="ux4g-drawer ux4g-drawer-right app-drawer" role="dialog" aria-modal="true" aria-labelledby="notifications-title" onMouseDown={(event) => event.stopPropagation()}><div className="drawer-header"><div><h2 id="notifications-title">Notifications</h2></div><button className="ux4g-icon-btn ux4g-icon-btn-text-primary ux4g-icon-btn-md" type="button" aria-label="Close notifications" onClick={onClose}><Icon name="close" /></button></div><div className="notification-list">{mockNotifications.map((notification) => <div className="notification-item" key={notification.id}><StatusTag tone={notification.tone} icon={notification.icon}>New</StatusTag><h3>{notification.title}</h3><p>{notification.body}</p><span>{notification.time}</span></div>)}</div></aside></div>
 }
 
 export function FAQPanel() {
@@ -348,7 +439,7 @@ export function AssistantPanel() {
     'Can I cancel this ticket?': 'This mock booking is eligible for cancellation. The estimated refund is ₹1,045 after a ₹180 cancellation charge and ₹20 in non-refundable charges.',
     'Where is my coach?': 'Your coach is B2, near the middle of the train. Your selected seats are B2-21 and B2-22.',
   }
-  return <div className="assistant-panel ux4g-card ux4g-card-solid ux4g-card-vertical"><div className="assistant-heading"><div className="assistant-avatar"><Icon name="auto_awesome" /></div><div><p className="eyebrow">RailConnect assistant</p><h3>Understand your journey</h3></div><StatusTag tone="info">Context-aware mock</StatusTag></div><div className="assistant-message"><p>{answer}</p></div><div className="assistant-prompts">{prompts.map((prompt) => <button key={prompt} className="ux4g-filter-chip-md" type="button" onClick={() => setAnswer(answers[prompt])}>{prompt}</button>)}</div><div className="ux4g-feedback"><p>Was this helpful?</p><div className="ux4g-feedback-chip-wrapper"><button className="ux4g-filter-chip-md" type="button">Yes</button><button className="ux4g-filter-chip-md" type="button">No</button></div></div></div>
+  return <div className="assistant-panel ux4g-card ux4g-card-solid ux4g-card-vertical"><div className="assistant-heading"><div className="assistant-avatar"><Icon name="auto_awesome" /></div><div><p className="eyebrow">India Connect assistant</p><h3>Understand your journey</h3></div><StatusTag tone="info">Context-aware mock</StatusTag></div><div className="assistant-message"><p>{answer}</p></div><div className="assistant-prompts">{prompts.map((prompt) => <button key={prompt} className="ux4g-filter-chip-md" type="button" onClick={() => setAnswer(answers[prompt])}>{prompt}</button>)}</div><div className="ux4g-feedback"><p>Was this helpful?</p><div className="ux4g-feedback-chip-wrapper"><button className="ux4g-filter-chip-md" type="button">Yes</button><button className="ux4g-filter-chip-md" type="button">No</button></div></div></div>
 }
 
 export function formatDate(date: string, includeWeekday = false) {
