@@ -1,4 +1,4 @@
-export type View = 'home' | 'results' | 'booking' | 'journey' | 'support'
+export type View = 'home' | 'results' | 'auth' | 'booking' | 'journey' | 'support'
 export type Quota = 'General' | 'Tatkal' | 'Premium Tatkal'
 export type BookingStage = 'seats' | 'passengers' | 'review' | 'payment' | 'confirmation'
 export type AvailabilityState = 'available' | 'rac' | 'waitlist'

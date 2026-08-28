@@ -3,6 +3,16 @@ import type { Train } from '../types'
 export type ScoreBreakdown = { availability: number; timing: number; duration: number; price: number }
 export type ScoredTrain = Train & { breakdown: ScoreBreakdown; relativeReasons: string[] }
 
+// These weights are part of the product explanation as well as the scoring
+// calculation. Keeping them in one place prevents the UI from drifting away
+// from the number shown to the user.
+export const SCORE_WEIGHTS = {
+  availability: 40,
+  timing: 20,
+  duration: 25,
+  price: 15,
+} as const
+
 const timeToMinutes = (time: string) => { const [hours, minutes] = time.split(':').map(Number); return hours * 60 + minutes }
 const durationToMinutes = (duration: string) => { const parts = duration.match(/(\d+)h\s*(\d+)m/); return parts ? Number(parts[1]) * 60 + Number(parts[2]) : 0 }
 
@@ -17,7 +27,7 @@ export function scoreTrains(trains: Train[]): ScoredTrain[] {
     const duration = Math.max(30, 100 - (durationToMinutes(train.duration) - Math.min(...durations)) / 3)
     const price = Math.max(30, 100 - (trainClass.fare - Math.min(...fares)) / 12)
     const breakdown = { availability: Math.round(availability), timing: Math.round(timing), duration: Math.round(duration), price: Math.round(price) }
-    const score = Math.round((breakdown.availability * .4) + (breakdown.timing * .2) + (breakdown.duration * .25) + (breakdown.price * .15))
+    const score = Math.round((breakdown.availability * SCORE_WEIGHTS.availability + breakdown.timing * SCORE_WEIGHTS.timing + breakdown.duration * SCORE_WEIGHTS.duration + breakdown.price * SCORE_WEIGHTS.price) / 100)
     return { ...train, score, breakdown, relativeReasons: [] }
   }).sort((a, b) => b.score - a.score)
 }

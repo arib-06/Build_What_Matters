@@ -15,6 +15,47 @@ const inferredOutlook = (status: SeatStatus, position?: number): ConfirmationOut
 }
 
 /**
+ * Return an indicative confirmation chance for a waitlisted/RAC request.
+ *
+ * Indian Railways/CRIS describes its production prediction as a dynamic,
+ * machine-learning model trained on historical waitlisted PNRs. The exact
+ * weights are not published, so this UI intentionally does not pretend to
+ * reproduce the railway's private formula. Instead, this deterministic
+ * proxy mirrors the public signals we can explain to a passenger: quota type
+ * (GNWL/RLWL/PQWL/TQWL), current position and RAC versus waitlist. It can be
+ * replaced by a live prediction response later without changing the card UI.
+ */
+export function getConfirmationChance(status: SeatStatus, position?: number, outlook?: ConfirmationOutlook): number | null {
+  if (status === 'confirmed') return 100
+
+  const currentPosition = Math.max(1, position ?? 1)
+  const model = {
+    // GNWL generally clears from the broadest cancellation pool.
+    GNWL: { startingChance: 94, penaltyPerPosition: 3 },
+    // RLWL/PQWL draw from smaller pools, so their outlook falls faster.
+    RLWL: { startingChance: 82, penaltyPerPosition: 4 },
+    PQWL: { startingChance: 76, penaltyPerPosition: 4 },
+    // Tatkal waitlist is only cleared if seats release before charting.
+    TQWL: { startingChance: 58, penaltyPerPosition: 5 },
+    // RAC permits boarding; the estimate is for a full berth becoming free.
+    RAC: { startingChance: 94, penaltyPerPosition: 2 },
+  } satisfies Record<Exclude<SeatStatus, 'confirmed'>, { startingChance: number; penaltyPerPosition: number }>
+
+  const { startingChance, penaltyPerPosition } = model[status]
+  const rawChance = startingChance - (currentPosition - 1) * penaltyPerPosition
+  if (status === 'RAC') return Math.max(70, Math.min(96, rawChance))
+
+  // Keep the number and the plain-language band shown beside it aligned.
+  const resolvedOutlook = outlook ?? inferredOutlook(status, currentPosition)
+  const range = resolvedOutlook === 'Likely to confirm'
+    ? { min: 70, max: 95 }
+    : resolvedOutlook === 'Possible'
+      ? { min: 35, max: 69 }
+      : { min: 5, max: 34 }
+  return Math.max(range.min, Math.min(range.max, rawChance))
+}
+
+/**
  * Keep railway terminology and the action it implies in one place. A live
  * prediction service can replace this deterministic copy without changing the
  * train-card or booking UI.
